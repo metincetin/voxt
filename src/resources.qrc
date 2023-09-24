@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="main.qml">contents/ui/main.qml</file>
+        <file alias="WordViewPage.qml">contents/ui/pages/WordViewPage.qml</file>
+        <file alias="CardWordsViewPage.qml">contents/ui/pages/CardWordsViewPage.qml</file>
+        <file alias="Components/Database.qml">contents/ui/components/Database.qml</file>
+
+        <file alias="StudyPage.qml">contents/ui/pages/StudyPage.qml</file>
+        <file alias="Components/WordView.qml">contents/ui/components/WordView.qml</file>
+    </qresource>
+</RCC>
+
