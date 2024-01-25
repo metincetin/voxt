@@ -12,7 +12,7 @@ Item{
 		db = LocalStorage.openDatabaseSync("voxt", "1.0", "", 100000)
 		db.transaction( function(tx) {
 			print('... create table')
-			tx.executeSql('CREATE TABLE IF NOT EXISTS words(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, context TEXT, source TEXT, cardID int NOT NULL, progress INTEGER DEFAULT 0)')
+			tx.executeSql('CREATE TABLE IF NOT EXISTS words(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, context TEXT, source TEXT, created DATE, cardID int NOT NULL, progress INTEGER DEFAULT 0)')
 			tx.executeSql('CREATE TABLE IF NOT EXISTS cards(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL)')
 			callback();
 		})
@@ -82,8 +82,58 @@ Item{
 
 	function putWord(data){
 		db.transaction(function (tx){
-			tx.executeSql("INSERT INTO words (name, context, source, cardID) VALUES (?,?,?,?)", [data.name, data.context, data.source, data.cardId	])
+			tx.executeSql("INSERT INTO words (name, context, source, created, cardID) VALUES (?,?,?, DATE('now'),?)", [data.name, data.context, data.source, data.cardId])
 		})
+	}
+
+	function toJson(callback){
+		db.transaction(function(tx){
+			var cards = tx.executeSql("SELECT * FROM cards").rows
+			var words = tx.executeSql("SELECT * FROM words").rows
+
+			var cardOut = []
+			var wordOut = []
+
+
+			for(var i = 0;i<cards.length;i++){
+				cardOut.push(cards[i])
+			}
+			for(var i = 0;i<words.length;i++){
+				wordOut.push(words[i])
+			}
+
+			console.log(JSON.stringify({"cards": cardOut, "words":wordOut}))
+
+			callback(JSON.stringify({"cards": cardOut, "words":wordOut}))
+
+		})
+	}
+	function tryImportData(jsonString, override, callback){
+		console.log(override)
+		try{
+			db.transaction(function (tx){
+				if (override){
+					tx.executeSql("DELETE FROM words")
+					tx.executeSql("DELETE FROM cards")
+				}
+
+				var js = JSON.parse(jsonString)
+
+				js.cards.forEach(function (data){
+					console.log(JSON.stringify(data))
+					tx.executeSql(`INSERT OR REPLACE INTO cards (id, name) VALUES (?, ?)`, [data.id, data.name])
+				})
+
+				js.words.forEach(function (data){
+					console.log([data.id, data.name, data.context, data.source, data.created, data.cardID])
+					tx.executeSql("INSERT OR REPLACE INTO words (id, name, context, progress, source, created, cardID) VALUES (?, ?, ?,?,?, ?,?)", [data.id, data.name, data.context, data.progress, data.source, data.created, data.cardID])
+				})
+
+				callback({error:false})
+			})
+		}catch(e){
+			callback({error:true, message: e})
+		}
 	}
 
     Component.onCompleted: {

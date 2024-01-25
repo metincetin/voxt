@@ -40,5 +40,35 @@ Item{
         anchors.top: wordContext.bottom
     }
 
+    RowLayout{
+        // to be implemented
+        visible:false
+        anchors {
+            left:root.left
+            right: root.right
+            top: wordContext.bottom
+            bottom:root.bottom
+            topMargin:64
+        }
+
+        Controls.GroupBox{
+            title: "Production"
+            Layout.fillHeight:true
+            Layout.fillWidth:true
+        }
+
+        Item{
+            Layout.fillWidth:true
+        }
+
+        Controls.GroupBox{
+            title: "Consumption"
+            Layout.fillHeight:true
+            Layout.fillWidth:true
+        }
+
+
+    }
+
 }
 

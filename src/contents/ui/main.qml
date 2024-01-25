@@ -60,12 +60,39 @@ Kirigami.ApplicationWindow {
             title:"Your Cards"
 
             actions.right:Kirigami.Action{
+                icon.name:"view-more-symbolic"
+                tooltip:"Settings"
+                Kirigami.Action{
+                    icon.name:"document-import"
+                    tooltip:"Import Data"
+                    text: "Import Data"
+                    onTriggered:
+                    {
+                        importDataSheet.reset()
+                        importDataSheet.open()
+                    }
+                }
+                Kirigami.Action{
+                    icon.name:"document-export"
+                    tooltip:"Export Data"
+                    text: "Export Data"
+                    onTriggered:{
+                        exportDataSheet.loadData()
+                        exportDataSheet.open()
+                    }
+                }
+            }
+
+            actions.left:
+                Kirigami.Action{
                 icon.name:"bqm-add"
                 tooltip:"New Card"
                 onTriggered:{
-                   newCardSheet.open()
+                    newCardSheet.open()
+                    }
                 }
-            }
+
+
 
             Controls.StackView.onActivated: readDatabase()
 
@@ -197,6 +224,105 @@ Kirigami.ApplicationWindow {
         id: aboutPage
         Kirigami.AboutPage {
             aboutData: About
+        }
+    }
+
+    Kirigami.OverlaySheet{
+        id:importDataSheet
+        header: Kirigami.Heading{
+            text: "Import"
+        }
+
+        function reset(){
+            errorLabel.visible = false
+        }
+
+        ColumnLayout{
+            Controls.TextArea{
+                id:pasteArea
+                placeholderText:"Paste data"
+
+                Layout.maximumHeight:250
+                Layout.fillWidth: true
+            }
+
+            Controls.CheckBox{
+                id:override
+                text:"Override"
+            }
+
+            Controls.Label{
+                id:errorLabel
+                property string error
+                text: `Error importing data ${error}`
+                color:Kirigami.Theme.negativeTextColor
+            }
+
+            Controls.Button{
+                text:"Import"
+                onClicked:{
+                    database.tryImportData(pasteArea.text, override.checkState == Qt.Checked, function(res){
+                        if (res.error){
+                            errorLabel.error = res.message.toString()
+                            errorLabel.visible = true
+                        }else{
+                            importDataSheet.close()
+                            readDatabase()
+                        }
+                    })
+                }
+            }
+        }
+    }
+
+    Kirigami.OverlaySheet{
+        id:exportDataSheet
+        header: Kirigami.Heading{
+                text: "Export"
+        }
+
+
+        function loadData(){
+            database.toJson(function(j){
+                exportDataText.text = j
+            });
+        }
+
+
+        ColumnLayout{
+            Controls.Label{
+                text:"Copy text below, then import it in another device"
+            }
+
+            Controls.TextArea{
+                id:exportDataText
+                enabled: false
+                Layout.fillWidth: true
+                Layout.maximumHeight:250
+                text:"Long text to copy from"
+
+            }
+
+            Controls.Button{
+                text:"Copy"
+                icon.name:"edit-copy"
+                onClicked:{
+                    exportDataText.selectAll()
+                    exportDataText.copy()
+                    this.text = "Copied.."
+                    this.icon.name = "answer-correct"
+                    copiedTextInterval.restart()
+
+                }
+                Timer{
+                    id:copiedTextInterval
+                    interval:500
+                    onTriggered:{
+                        parent.text = "Copy"
+                        parent.icon.name = "edit-copy"
+                    }
+                }
+            }
         }
     }
 

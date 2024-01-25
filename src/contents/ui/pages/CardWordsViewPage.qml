@@ -3,6 +3,7 @@ import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15 as Controls
 import org.kde.kirigami 2.20 as Kirigami
 import "Components"
+import QtLocation 5.6
 
 Kirigami.Page{
 	id: root
@@ -74,6 +75,7 @@ Kirigami.Page{
 		}
 		Controls.Label{
 			text:`Total progress: ${parseInt(totalProgress)}%`
+			leftPadding:32
 		}
 
 		Rectangle{
@@ -81,10 +83,26 @@ Kirigami.Page{
 			Layout.fillWidth: true
 			Layout.fillHeight:true
 
+
+			Controls.TextField{
+				id: searchBox
+				anchors{
+					left:parent.left
+					right:parent.right
+					top:parent.top
+				}
+				placeholderText: "Search"
+			}
+
 			ListView{
 				id: view
 				model: listModel
-				anchors.fill:parent
+				anchors{
+					top:searchBox.bottom
+					left:parent.left
+					right:parent.right
+					bottom:parent.bottom
+				}
 
 				clip:true
 
@@ -92,8 +110,9 @@ Kirigami.Page{
 
 				highlightMoveDuration: 50
 				delegate:Item{
+					visible: searchBox.text == "" || (searchBox.text != "" && name.includes(searchBox.text))
 					width: view.width
-					height:40
+					height:visible ? 40 : 0
 					RowLayout{
 						anchors.fill:parent
 						anchors.leftMargin:8
