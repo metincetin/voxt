@@ -3,7 +3,6 @@ import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15 as Controls
 import org.kde.kirigami 2.20 as Kirigami
 import "Components"
-import QtLocation 5.6
 
 Kirigami.Page{
 	id: root
