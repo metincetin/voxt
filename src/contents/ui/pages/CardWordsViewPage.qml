@@ -74,7 +74,6 @@ Kirigami.Page{
 		}
 		Controls.Label{
 			text:`Total progress: ${parseInt(totalProgress)}%`
-			leftPadding:32
 		}
 
 		Rectangle{
